@@ -1,17 +1,15 @@
-# Use a base image with Java pre-installed
-FROM openjdk:11
+FROM maven:3.5.4-jdk-8-alpine as build
 
-# Set the working directory in the container
+COPY ./pom.xml ./pom.xml
+
+COPY ./src ./src
+
+RUN mvn package
+
+FROM openjdk:8-jdk
+
 WORKDIR /app
 
-# Copy the application files into the container
-COPY . .
+COPY --from=build target/sample-*.jar ./sample.jar
 
-# Build the application using Maven
-RUN ./mvnw package
-
-# Expose the port(s) that the application will listen on
-EXPOSE 8080
-
-# Define the command to run your application
-CMD ["java", "-jar", "target/java-test-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "./sample.jar"]
